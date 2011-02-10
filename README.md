@@ -1,11 +1,23 @@
+Intro
+=====
+
 This grew out of an experimental attempt to build an HTML5 video API. A video is
 a complex, stateful object that can be interacted with differently depending on
 which state it's currently in. Plus, I needed to tie in metrics, so it wasn't
 enough just to know when it was playing, I also needed to know if it had been
 played from the beginning or resumed after pause, etc. I finally decided a
-finite state machine was the only to keep sanity in the code. I don't know if
-this is a Proper FSM implementation that would satisfy the comp-sci elite, but I
-like it because it feels "eventy" and it does what I need.
+finite state machine was the only to keep sanity in the code.
+
+I don't know if this is a Proper FSM implementation that would satisfy the
+comp-sci elite, but I like it because it feels "eventy" and it does what I need.
+
+Dependencies
+============
+
+smallfsm has no dependencies on other libraries.
+
+Examples
+========
 
 usage example 1, basic example:
 
