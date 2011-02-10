@@ -4,8 +4,8 @@ which state it's currently in. Plus, I needed to tie in metrics, so it wasn't
 enough just to know when it was playing, I also needed to know if it had been
 played from the beginning or resumed after pause, etc. I finally decided a
 finite state machine was the only to keep sanity in the code. I don't know if
-this is a Proper finite state machine implementation that would satisfy the
-compsci elite, but I like it because it feels "eventy" and it does what I need.
+this is a Proper FSM implementation that would satisfy the comp-sci elite, but I
+like it because it feels "eventy" and it does what I need.
 
 usage example 1, basic example:
 
