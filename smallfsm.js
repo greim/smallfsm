@@ -28,7 +28,7 @@ var SmallFSM = (function(){
 			}
 		}
 
-		function emit(eventName, eventObj){
+		function emitCustom(eventName, eventObj){
 			var evq = events[eventName];
 			if (evq) {
 				for (var i=0; i<evq.length; i++) {
@@ -101,7 +101,7 @@ var SmallFSM = (function(){
 				if (tr.action) { tr.action(event); }
 				var events = tr.events;
 				for (var i=0; i<events.length; i++){
-					emit(events[i], event);
+					emitCustom(events[i], event);
 				}
 			} catch (err) {
 				throw new Error('player state error: '+err);
