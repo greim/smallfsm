@@ -6,7 +6,9 @@ a complex, stateful object that can be interacted with differently depending on
 which state it's currently in. Plus, I needed to tie in metrics, so it wasn't
 enough just to know when it was playing, I also needed to know if it had been
 played from the beginning or resumed after pause, etc. I finally decided a
-finite state machine was the only way to keep sanity in the code.
+finite state machine was the only way to keep sanity in the code. Afterwards, I
+thought that this little FSM tool was cool enough to distill into a separate
+library.
 
 I don't know if this is a Proper FSM implementation that would satisfy the
 comp-sci elite, but I like it because it feels "eventy" and it does what I need.
