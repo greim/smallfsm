@@ -37,20 +37,17 @@ describe('SmallFSM', function(){
 	it('should allow action to be undefined', function(){
 		new SmallFSM('foo')
 			.onTransit('foo => bar')
-			.begin()
 			.transit('bar');
 	});
 	it('should alias allowTransit to onTransit', function(){
 		new SmallFSM('foo')
 			.allowTransit('foo => bar')
-			.begin()
 			.transit('bar');
 	});
 	it('should run a valid transition', function(){
 		var x = false;
 		new SmallFSM('foo')
 			.onTransit('foo => bar',function(){x=true;})
-			.begin()
 			.transit('bar');
 		expect(x).toEqual(true);
 	});
@@ -58,7 +55,6 @@ describe('SmallFSM', function(){
 		var x = false;
 		new SmallFSM('foo')
 			.onTransit('foo => bar => baz',function(){x=true;})
-			.begin()
 			.transit('bar')
 			.transit('baz');
 		expect(x).toEqual(true);
@@ -66,12 +62,10 @@ describe('SmallFSM', function(){
 	it('should be callable with or without new keyword', function(){
 		new SmallFSM('foo')
 			.allowTransit('foo => bar => baz')
-			.begin()
 			.transit('bar')
 			.transit('baz');
 		SmallFSM('foo')
 			.allowTransit('foo => bar => baz')
-			.begin()
 			.transit('bar')
 			.transit('baz');
 	});
@@ -79,7 +73,6 @@ describe('SmallFSM', function(){
 		var x = false;
 		new SmallFSM('foo')
 			.onTransit('  foo=>\nbar	 => baz=>bip\n\n',function(){x=true;})
-			.begin()
 			.transit('bar')
 			.transit('baz')
 			.transit('bip');
@@ -90,7 +83,6 @@ describe('SmallFSM', function(){
 		SmallFSM('foo')
 			.onTransit('foo => bar => baz',function(){},'didit')
 			.on('didit',function(){x=true;})
-			.begin()
 			.transit('bar')
 			.transit('baz');
 		expect(x).toEqual(true);
@@ -100,7 +92,6 @@ describe('SmallFSM', function(){
 		SmallFSM('foo')
 			.onTransit('foo => bar => baz',function(e){x+='A'+e.foo;},'didit')
 			.on('didit',function(e){x+='B'+e.foo;})
-			.begin()
 			.transit('bar')
 			.transit('baz',{foo:'-'});
 		expect(x).toEqual('A-B-');

@@ -22,6 +22,7 @@ var SmallFSM = (function(){
 		var transitions = {}; // stores valid state transition
 		var custEvents = {}; // stores custom events
 		var beginFunc; // may contain a func that runs at startup
+		var begun = false;
 		var sep = '!';
 
 		function emitCustom(eventName, eventObj){
@@ -48,9 +49,12 @@ var SmallFSM = (function(){
 		@method - Starts the machine.
 		*/
 		FSM.begin = function(){
-			states[startingState]=true;
-			stateHist.push(startingState);
-			if (beginFunc) {beginFunc();}
+			if (!begun) {
+				states[startingState]=true;
+				stateHist.push(startingState);
+				if (beginFunc) {beginFunc();}
+				begun = true;
+			}
 			return FSM;
 		};
 
@@ -126,6 +130,7 @@ var SmallFSM = (function(){
 		it isn't an allowed transition.
 		*/
 		FSM.transit = function(toState, event){
+			if (!begun) { FSM.begin(); }
 			event = event || {};
 			var matchFound=false;
 			hStr = stateHist.join(sep)+sep+toState;
@@ -148,8 +153,8 @@ var SmallFSM = (function(){
 				}
 			} else {
 				stateHist.push(toState);
-				if (stateHist.length > 16) {
-					stateHist.splice(0,6);
+				if (stateHist.length > 64) {
+					stateHist.splice(0,8);
 				}
 			}
 			return FSM;

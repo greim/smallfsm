@@ -6,7 +6,7 @@ The `SmallFSM` constructor exposed by this lib returns an object that can be use
  * Grab a new instance and declare its beginning state.
  * Declare which state transitions are allowed (transitions involving >2 states are allowed), and optionally any actions or custom events for each allowed transition.
  * Set any custom event handlers.
- * Start the machine.
+ * Optionally set a callback to be run once when the machine first starts.
  * Execute transitions as necessary.
 
 Dependencies
@@ -34,7 +34,18 @@ usage example 1, basic example:
     // attempt to push the machine into the 'ready' state
     fsm.transit('ready'); // 'hello' is printed
 
-usage example 2, adding a custom event (also showing method chaining):
+usage example 2, adding a begin callback:
+
+    // if set, begin callback only runs once.
+    // either at the first transition or by explicitly calling the begin() method
+    SmallFSM('loading')
+        .allowTransit('loading => ready')
+        .onBegin(function(){
+            console.log('begun');
+        }).transit('ready');
+        // 'begun' is printed
+
+usage example 3, adding a custom event (also showing method chaining):
 
     // custom events aren't strictly necessary, but provide a nice abstraction.
     // transiting from 'loading' to 'ready' will trigger the 'readyToGo' event
@@ -48,7 +59,7 @@ usage example 2, adding a custom event (also showing method chaining):
         .transit('ready');
         // 'hello' and then 'world' are printed
 
-usage example 3, passing contextual info:
+usage example 4, passing contextual info:
 
     var fsm = SmallFSM('loading');
 
@@ -62,7 +73,7 @@ usage example 3, passing contextual info:
     fsm.transit('error',{errMsg:'file not found'});
     // 'file not found' is printed
 
-usage example 4, tracking three or more state phases:
+usage example 5, tracking three or more state phases:
 
     var fsm = SmallFSM('loading');
 
