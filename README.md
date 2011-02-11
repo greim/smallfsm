@@ -66,7 +66,9 @@ usage example 4, tracking three or more state phases:
 
     var fsm = SmallFSM('loading');
 
-    // only two-state transitions have been shown so far
+    // only two-state transitions have been shown so far,
+    // but three state (and higher) transitions are also allowed.
+    // note: this will implicitly allow 'loading => ready' and 'ready => done' transitions
     fsm.onTransit('loading => ready => done',function(){
         console.log('the whole thing finished');
     });
