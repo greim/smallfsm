@@ -1,35 +1,31 @@
 /**
 JavaScript finite state machine (FSM) library that uses an event-driven pattern
 for state transitions.
+@param startingState - Which state the machine starts in.
 */
 
 var SmallFSM = (function(){
 
 	/**
 	@constructor - Returns an FSM instance.
-	@param stateList - List of strings declaring states this FSM can be in. The first element is the starting state. Beyond that, order doesn't matter.
 	*/
-	return function(stateList){
+	return function(startingState){
 
-		var state = null; // private var which tracks current state
-		var states = {}; // stores valid state transition
-		var events = {}; // stores custom events
+		var FSM = {};
+
+		if (!startingState){
+			throw new Error('no starting state provided');
+		}
+
+		var stateHist = []; // private var which tracks current state
+		var states = {};
+		var transitions = {}; // stores valid state transition
+		var custEvents = {}; // stores custom events
 		var beginFunc; // may contain a func that runs at startup
-
-		// initialize states
-		for(var i=0;i<stateList.length;i++){
-			states[stateList[i]] = {};
-		}
-		for (var fromState in states) {
-			for (var toState in states) {
-				if (states.hasOwnProperty(toState)){
-					states[fromState][toState] = false;
-				}
-			}
-		}
+		var sep = '!';
 
 		function emitCustom(eventName, eventObj){
-			var evq = events[eventName];
+			var evq = custEvents[eventName];
 			if (evq) {
 				for (var i=0; i<evq.length; i++) {
 					evq[i](eventObj);
@@ -43,22 +39,27 @@ var SmallFSM = (function(){
 		@method - Optionally function to set a callback to run when the
 		machione starts.
 		*/
-		this.onBegin = function(f){
+		FSM.onBegin = function(f){
 			beginFunc = f;
+			return FSM;
 		};
 
 		/**
 		@method - Starts the machine.
 		*/
-		this.begin = function(){
-			state = stateList[0];
-			if (beginFunc) { beginFunc(); }
+		FSM.begin = function(){
+			states[startingState]=true;
+			stateHist.push(startingState);
+			if (beginFunc) {beginFunc();}
+			return FSM;
 		};
 
 		/**
 		@method - Gets the current state of the machine.
 		*/
-		this.getState = function(){return state;};
+		FSM.getState = function(){
+			return stateHist[stateHist.length-1];
+		};
 
 		/**
 		@method - Sets a handler for for a given transition. Also causes the machine
@@ -69,22 +70,54 @@ var SmallFSM = (function(){
 		@param events - String containing space-separated list of custom events
 		to be emitted when this transition occurrs.
 		*/
-		this.onTransit = function(transition, action, events){
-			transition = transition.split(/\s*=>\s*/);
-			var from = transition[0], to = transition[1];
-			states[from][to] = {
-				events: (events || '').split(/\s+/g),
-				action: action
-			};
+		FSM.onTransit = FSM.allowTransit = function(transition, action, events, clobberable){
+			if (transition.indexOf(sep)!=-1){
+				throw new Error('transition string cannot contain "'+sep+'" character');
+			}
+			var tr = transition.split(/\s*=>\s*/);
+			// clean up transition list and store the state
+			for (var i=0;i<tr.length;i++){
+				tr[i] = tr[i].replace(/^\s\s*/,'').replace(/\s\s*$/,'');
+				states[tr[i]]=true;
+			}
+			// build string to internally store representation of transition
+			var trStr = tr.join(sep);
+			// populate all two-length transitions comprising transitions
+			// of three or more but make them clobberable
+			if (tr.length > 2) {
+				for (var i=1;i<tr.length;i++){
+					var newTransition = tr[i-1]+' => '+tr[i];
+					FSM.onTransit(newTransition, null, null, true);
+				}
+			}
+			var exst = !!transitions[trStr], // this transition already exists
+			    clb = !!clobberable, // whether transition being added wants to be clobberable
+			    write = !exst || (exst && !clb), // whether to write/overwrite this transition
+			    err = exst && !clb && !transitions[trStr].clb; // whether to throw an error
+			if (write) {
+				transitions[trStr] = {
+					pattern: new RegExp('(^|'+sep+')'+trStr+'$'),
+					events: events?events.split(/\s+/):[],
+					action: action,
+					clb:!!clobberable
+				};
+			}
+			if (err) {
+				var errMsg = 'cannot overwrite "'+transition
+					+'" transition, already exists'
+				throw new Error(errMsg);
+			}
+			return FSM;
 		};
 
 		/**
 		@method - Sets a handler for a custom event.
 		*/
-		this.on = function(event, action){
-			var evq = events[event];
-			if (!evq) { events[event] = evq = []; }
+		FSM.on = function(event, action){
+			var evq = custEvents[event];
+			if (!evq) { custEvents[event] = evq = []; }
 			evq.push(action);
+			return FSM;
 		};
 
 		/**
@@ -92,23 +125,37 @@ var SmallFSM = (function(){
 		@throws Error - If the state wasn't declared in the constructor or if
 		it isn't an allowed transition.
 		*/
-		this.transit = function(toState, event){
+		FSM.transit = function(toState, event){
 			event = event || {};
-			try {
-				var tr = states[state][toState];
-				if (!tr) { throw new Error('invalid state'); }
-				state = toState;
-				if (tr.action) { tr.action(event); }
-				var events = tr.events;
-				for (var i=0; i<events.length; i++){
-					emitCustom(events[i], event);
+			var matchFound=false;
+			hStr = stateHist.join(sep)+sep+toState;
+			for (var trs in transitions) {
+				if(!transitions.hasOwnProperty(trs)){continue;}
+				var tr=transitions[trs];
+				if (tr.pattern.test(hStr)){
+					matchFound=true;
+					if (tr.action) { tr.action(event); }
+					for (var i=0;i<tr.events.length;i++){
+						emitCustom(tr.events[i],event);
+					}
 				}
-			} catch (err) {
-				throw new Error('player state error: '+err);
 			}
+			if(!matchFound){
+				if(!states[toState]) {
+					throw new Error('"'+toState+'" is not a valid state');
+				} else {
+					throw new Error('"'+FSM.getState()+' => '+toState+'" is not a valid transition');
+				}
+			} else {
+				stateHist.push(toState);
+				if (stateHist.length > 16) {
+					stateHist.splice(0,6);
+				}
+			}
+			return FSM;
 		};
 
-		return this;
-	}
+		return FSM;
+	};
 
 })();
