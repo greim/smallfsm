@@ -37,6 +37,7 @@ usage example 2, adding a begin callback:
 
     // the begin callback only ever runs once.
     // it will run automatically at the first transition or you can make it run explicitly
+    // (note that onTransit() and allowTransit() are aliases of each other)
     SmallFSM('loading')
         .allowTransit('loading => ready')
         .onBegin(function(){
