@@ -1,7 +1,7 @@
 Intro
 =====
 
-The `SmallFSM` constructor exposed by this lib returns an object that can be used to represent and manipulate complex statefulness. It (more or less) follows the "finite state machine" pattern. Here's how you use it:
+The `SmallFSM()` constructor exposed by this lib returns an object that can be used to represent and manipulate complex statefulness. It (more or less) follows the "finite state machine" pattern. Here's how you use it:
 
  * Grab a new instance and declare its beginning state.
  * Declare which state transitions are allowed (transitions involving >2 states are allowed), and optionally any actions or custom events for each allowed transition.
@@ -22,30 +22,30 @@ usage example 1, basic example:
     // get a new fsm instance with the given begin state
     var fsm = SmallFSM('loading');
 
-    // declares a given transition to be allowable and also
-    // sets an action to be performed whenever that happens
+    // declares 'loading' and 'ready' as allowed states
+    // declares 'loading => ready' to be an allowed transition
+    // sets a callback to be executed when the 'loading => ready' transition occurrs
     fsm.onTransit('loading => ready',function(){
         console.log('hello');
     });
 
-    // places the machine into its starting state
-    fsm.begin();
-
-    // attempt to push the machine into the 'ready' state
+    // push the machine into the 'ready' state
+    // this will generate an error unless the current state is 'loading'
     fsm.transit('ready'); // 'hello' is printed
 
 usage example 2, adding a begin callback:
 
-    // if set, begin callback only runs once.
-    // either at the first transition or by explicitly calling the begin() method
+    // the begin callback only ever runs once.
+    // it will run automatically at the first transition or you can make it run explicitly
     SmallFSM('loading')
         .allowTransit('loading => ready')
         .onBegin(function(){
             console.log('begun');
-        }).transit('ready');
-        // 'begun' is printed
+        }).transit('ready'); // 'begun' is printed
 
-usage example 3, adding a custom event (also showing method chaining):
+    // also note methods can be chained
+
+usage example 3, adding a custom event:
 
     // custom events aren't strictly necessary, but provide a nice abstraction.
     // transiting from 'loading' to 'ready' will trigger the 'readyToGo' event
@@ -56,8 +56,7 @@ usage example 3, adding a custom event (also showing method chaining):
         .on('readyToGo',function(){
             console.log('world');
         }).begin()
-        .transit('ready');
-        // 'hello' and then 'world' are printed
+        .transit('ready'); // 'hello' and then 'world' are printed
 
 usage example 4, passing contextual info:
 
