@@ -1,4 +1,10 @@
 /**
+Copyright 2011 by Greg Reimer
+Released under the MIT license.
+https://github.com/greim/smallfsm
+
+=================================
+
 JavaScript finite state machine (FSM) library that uses an event-driven pattern
 for state transitions.
 @param startingState - Which state the machine starts in.

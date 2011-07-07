@@ -1,7 +1,7 @@
 Intro
 =====
 
-The `SmallFSM()` constructor exposed by this lib returns an object that can be used to represent and manipulate complex statefulness. It (more or less) follows the "finite state machine" pattern. Here's how you use it:
+SmallFSM is an open source JavaScript library under the MIT license. The `SmallFSM()` constructor exposed by this lib returns an object that can be used to represent and manipulate complex statefulness. It (more or less) follows the "finite state machine" pattern. Here's how you use it:
 
  * Grab a new instance and declare its beginning state.
  * Declare which state transitions are allowed (transitions involving >2 states are allowed), and optionally any actions or custom events for each allowed transition.
